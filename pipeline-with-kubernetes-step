@@ -1,0 +1,17 @@
+pipeline {
+  agent any
+  stages {
+   stage('Deploying App to Kubernetes') {
+      steps {
+        script {
+          kubernetesDeploy(configs: "deploymentservice.yml", kubeconfigId: "kubernetes")
+        }
+      }
+   }
+  }
+ }
+ 
+ 
+ we need to add new continous deploy plugin on jenkins
+ 
+ https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqa2w4UWVqYU5qQnh6TEQ5bGVoU09hbm40NFJfUXxBQ3Jtc0trc0ZHaUVzOFFBRHI2clg2OEdENTkwTlo0THVGSlhzVGxMU1JRYmRmV1MtWVh5bEFFR1pBWWs4a01HcDdEQVg0Z2w4UUNIeFVXelBLeWQ1U3N6WGVDbS14TjZMUWs4WkNwdU9fbmkzSkNOZnR6WXE4aw&q=https%3A%2F%2Fupdates.jenkins.io%2Fdownload%2Fplugins%2Fkubernetes-cd%2F1.0.0%2Fkubernetes-cd.hpi
