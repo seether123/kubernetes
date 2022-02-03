@@ -1,0 +1,49 @@
+pipeline{
+    agent any
+    tools {
+     maven '3.8.4'
+    }
+    stages {
+        stage ('Initialize') {
+            steps {
+                sh '''
+                    echo "PATH = ${PATH}"
+                    echo "M2_HOME = ${M2_HOME}"
+                '''
+            }
+        }
+        // stage ('checkout') {
+        //     steps {
+        //         sh 'git clone https://github.com/spring-guides/gs-maven.git'
+        //     }
+        // }
+
+        stage ('Build') {
+            steps {
+                sh 'mvn -f /var/lib/jenkins/workspace/maven-pipeline/gs-maven/complete clean install ' 
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                sh "docker build -t systemctl123456/podinfo:${env.BUILD_NUMBER} ."
+            }
+        }
+        stage('Docker Push') {
+           steps {
+             withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+             sh "docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}"
+             sh "docker push systemctl123456/podinfo:${env.BUILD_NUMBER}"
+             }
+           }
+        }
+        stage('Deploying App to Kubernetes') {
+           steps {
+             sh 'cp deployment.yml_bkp deployment.yml'
+             sh 'sed -i  "s/{{BUILD_NUMBER}}/$BUILD_NUMBER/g" /var/lib/jenkins/workspace/maven-pipeline/deployment.yml '
+             script {
+                kubernetesDeploy(configs: "deployment.yml", kubeconfigId: "kubernetes")
+        }
+      }
+   }
+ }
+}
