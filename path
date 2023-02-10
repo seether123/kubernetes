@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# Calculate 24 hours ago timestamp
+time_24_hours_ago=$(date -d "24 hours ago" +%s)
+
+# Search for JAR or WAR files in /app/backup and subdirectories
+for path in /app/backup/*.jar /app/backup/**/*.jar /app/backup/*.war /app/backup/**/*.war; do
+  # Check if the current path is a file and was modified within the last 24 hours
+  if [ -f "$path" ] && [ "$(stat -c %Y "$path")" -gt "$time_24_hours_ago" ]; then
+    cp "$path" /tmp/folder
+  fi
+done
