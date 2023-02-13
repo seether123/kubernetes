@@ -1,0 +1,4 @@
+cluster.name: my-cluster
+node.name: node1
+network.host: 0.0.0.0
+discovery.seed_hosts: ["node1", "node2", "node3"]
