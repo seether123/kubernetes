@@ -1,1 +1,2 @@
 kubectl exec <pod-name> -c <container-name> -- sh -c "usage_in_bytes=\$(cat /sys/fs/cgroup/memory/memory.usage_in_bytes); usage_in_gb=\$(echo \"scale=2; \$usage_in_bytes / 1024 / 1024 / 1024\" | bc); echo \"Memory usage: \${usage_in_gb} GB\""
+kubectl exec <pod-name> -c <container-name> -- sh -c "usage_in_bytes=\$(cat /sys/fs/cgroup/memory/memory.usage_in_bytes); usage_in_mb=\$((usage_in_bytes / 1024 / 1024)); echo \"Memory usage: \${usage_in_mb} MB\""
