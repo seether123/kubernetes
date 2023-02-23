@@ -1,0 +1,7 @@
+kubectl create namespace logging
+kubectl apply -f https://download.elastic.co/downloads/eck/1.6.0/all-in-one.yaml -n logging
+kubectl create secret generic fluentd-elasticsearch-secret --from-literal=FLUENT_ELASTICSEARCH_HOST=elasticsearch-cluster-es-http.logging.svc.cluster.local --from-literal=FLUENT_ELASTICSEARCH_PORT=9200 -n logging
+
+kubectl apply -f https://raw.githubusercontent.com/fluent/fluentd-kubernetes-daemonset/master/fluentd-daemonset-elasticsearch-rbac.yaml -n logging
+
+kubectl apply -f https://raw.githubusercontent.com/fluent/fluentd-kubernetes-daemonset/master/fluentd-daemonset-elasticsearch.yaml -n logging
