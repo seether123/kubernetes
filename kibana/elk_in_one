@@ -1,0 +1,4 @@
+kubectl apply -f https://github.com/fluent/fluentd-kubernetes-daemonset/raw/master/fluentd-daemonset-elasticsearch/fluentd-daemonset-elasticsearch.yaml -n logging
+kubectl apply -f <kibana-definition-file> -n logging
+kubectl expose deployment <kibana-deployment-name> --type=NodePort --name=<kibana-service-name> -n logging
+kubectl get svc <kibana-service-name> -n logging
