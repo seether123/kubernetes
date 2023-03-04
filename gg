@@ -1,0 +1,16 @@
+import csv
+
+csv_file = 'k6_results.csv'
+prom_file = 'k6_results.prom'
+
+with open(csv_file, newline='') as csvfile, open(prom_file, 'w') as promfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        promfile.write('k6_requests_total{method="%s",status="%s"} %s\n' % (
+            row['method'], row['status'], row['count']))
+        promfile.write('k6_duration_seconds{method="%s",status="%s"} %s\n' % (
+            row['method'], row['status'], row['sum']))
+        promfile.write('k6_duration_seconds_count{method="%s",status="%s"} %s\n' % (
+            row['method'], row['status'], row['count']))
+        promfile.write('k6_duration_seconds_sum{method="%s",status="%s"} %s\n' % (
+            row['method'], row['status'], row['sum']))
