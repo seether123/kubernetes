@@ -1,16 +1,30 @@
 import csv
 
-csv_file = 'k6_results.csv'
-prom_file = 'k6_results.prom'
+csv_file = 'test_reports.csv'
+prom_file = 'test_reports.prom'
 
 with open(csv_file, newline='') as csvfile, open(prom_file, 'w') as promfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        promfile.write('k6_requests_total{method="%s",status="%s"} %s\n' % (
-            row['method'], row['status'], row['count']))
-        promfile.write('k6_duration_seconds{method="%s",status="%s"} %s\n' % (
-            row['method'], row['status'], row['sum']))
-        promfile.write('k6_duration_seconds_count{method="%s",status="%s"} %s\n' % (
-            row['method'], row['status'], row['count']))
-        promfile.write('k6_duration_seconds_sum{method="%s",status="%s"} %s\n' % (
-            row['method'], row['status'], row['sum']))
+        labels = 'group="%s",method="%s",method_name="%s",proto="%s",scenario="%s",service="%s",status="%s",subproto="%s",tls_version="%s",url="%s"' % (
+            row['group'], row['method'], row['method name'], row['proto'], row['scenario'], row['service'], row['status'], row['subproto'], row['tls_version'], row['url'])
+        if row['extra_tags']:
+            labels += ',' + row['extra_tags']
+        if row['metadata']:
+            labels += ',' + row['metadata']
+        if row['error'] == 'true':
+            promfile.write('test_errors{%s,error_code="%s",expected_response="%s"} %s\n' % (
+                labels, row['error_code'], row['expected_response'], row['check']))
+        else:
+            promfile.write('%s{%s} %s\n' % (row['metric_name'], labels, row['metric_value']))
+            
+            
+scrape_configs:
+  - job_name: 'test_reports'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['localhost:9091']
+    file_sd_configs:
+      - files:
+        - /path/to/test_reports.prom
+
