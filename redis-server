@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Check if Redis instances are running
+REDIS_6389=$(ps -ef | grep -i redis | grep -v grep | grep ':6389' | wc -l)
+REDIS_6399=$(ps -ef | grep -i redis | grep -v grep | grep ':6399' | wc -l)
+
+if [[ $REDIS_6389 -eq 0 ]]; then
+    echo "Redis instance on port 6389 is not running. Starting Redis instance on port 6389..."
+    sudo -u redisusr /usr/bin/redis-server /etc/redis/6389.conf
+fi
+
+if [[ $REDIS_6399 -eq 0 ]]; then
+    echo "Redis instance on port 6399 is not running. Starting Redis instance on port 6399..."
+    sudo -u redisusr /usr/bin/redis-server /etc/redis/6399.conf
+fi
