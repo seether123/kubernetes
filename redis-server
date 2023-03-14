@@ -13,3 +13,8 @@ if [[ $REDIS_6399 -eq 0 ]]; then
     echo "Redis instance on port 6399 is not running. Starting Redis instance on port 6399..."
     sudo -u redisusr /usr/bin/redis-server /etc/redis/6399.conf
 fi
+
+
+
+npm config rm {proxy,https-proxy,registry}
+npm config set {proxy,registry} "xyz:8080" "https://"
