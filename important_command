@@ -1,0 +1,1 @@
+sed -i "s/npm run build:[^ ]*/npm run build:$(env)/g" Dockerfile
