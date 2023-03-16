@@ -67,5 +67,7 @@ kubectl config set-credentials dan --token=<token>
 kubectl config set-context dan-context --cluster=my-cluster --namespace=pc-analytics --user=dan
 kubectl config use-context dan-context
 
-
+TO get the token fron service account
+kubectl get serviceaccounts <service-account-name> -o=jsonpath='{.secrets[*].name}'
+kubectl get secret <secret-name> -o=jsonpath='{.data.token}' | base64 --decode
 
