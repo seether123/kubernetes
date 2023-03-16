@@ -4,127 +4,51 @@ metadata:
   name: pc-analytics
 
 ---
-
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: ubuntu
-  namespace: pc-analytics
-
----
-
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
-  name: pod-reader
-  namespace: pc-analytics
+  name: pc-analytics-cluster-role
 rules:
 - apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get", "list", "watch"]
-
----
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: deployment-manager
-  namespace: pc-analytics
-rules:
-- apiGroups: [""]
-  resources: ["deployments"]
+  resources: ["pods", "services", "deployments"]
   verbs: ["get", "list", "watch", "create", "update", "delete"]
 
 ---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pc-analytics-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pc-analytics-cluster-role
+subjects:
+- kind: User
+  name: ubuntu
+  apiGroup: rbac.authorization.k8s.io
 
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: service-manager
+  name: pc-analytics-role
   namespace: pc-analytics
 rules:
 - apiGroups: [""]
-  resources: ["services"]
+  resources: ["pods", "services", "deployments"]
   verbs: ["get", "list", "watch", "create", "update", "delete"]
 
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: pod-reader-binding
+  name: pc-analytics-role-binding
   namespace: pc-analytics
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: pod-reader
+  name: pc-analytics-role
 subjects:
-- kind: ServiceAccount
+- kind: User
   name: ubuntu
-  namespace: pc-analytics
-
----
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: deployment-manager-binding
-  namespace: pc-analytics
-roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: deployment-manager
-subjects:
-- kind: ServiceAccount
-  name: ubuntu
-  namespace: pc-analytics
-
----
-
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: service-manager-binding
-  namespace: pc-analytics
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: service-manager
-subjects:
-- kind: ServiceAccount
-  name: ubuntu
-  namespace: pc-analytics
-
----
-
-apiVersion: v1
-kind: Pod
-metadata:
-  name: nginx-pod
-  labels:
-    app: nginx
-spec:
-  containers:
-  - name: nginx-container
-    image: nginx
-    ports:
-    - containerPort: 80
-  serviceAccountName: ubuntu
-  serviceAccount: ubuntu
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx-service
-spec:
-  selector:
-    app: nginx
-  ports:
-  - name: http
-    port: 80
-    targetPort: 80
-  type: LoadBalancer
-  selector:
-    app: nginx
