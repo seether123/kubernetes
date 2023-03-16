@@ -39,6 +39,7 @@ roleRef:
 kubectl -n pc-analytics describe secret $(kubectl -n pc-analytics get secret | grep dan | awk '{print $1}')
 mkdir -p /home/dan/.kube
 
+Create a new file called config in the .kube directory and add the following content:
 
 apiVersion: v1
 kind: Config
