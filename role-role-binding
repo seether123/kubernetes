@@ -1,0 +1,24 @@
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: pc-analytics
+  name: pv-pvc-reader
+rules:
+- apiGroups: [""]
+  resources: ["persistentvolumes", "persistentvolumeclaims"]
+  verbs: ["get", "list"]
+
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: pv-pvc-reader-binding
+  namespace: pc-analytics
+subjects:
+- kind: User
+  name: sijiopa
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: pv-pvc-reader
+  apiGroup: rbac.authorization.k8s.io
