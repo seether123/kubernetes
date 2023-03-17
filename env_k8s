@@ -26,3 +26,51 @@ spec:
       - name: my-app-env
         configMap:
           name: my-app-env-sit # or my-app-env-preprod or my-app-env-prod
+
+
+
+# First stage: build the application
+FROM node:14-alpine as builder
+
+ARG BUILD_ENV=sit
+ENV BUILD_ENV=${BUILD_ENV}
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+RUN npm run build:${BUILD_ENV}
+
+# Second stage: serve the application with Nginx
+FROM nginx:1.21-alpine
+
+COPY --from=builder /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp-preprod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp-preprod
+  template:
+    metadata:
+      labels:
+        app: myapp-preprod
+    spec:
+      containers:
+        - name: myapp
+          image: myapp:latest
+          env:
+            - name: BUILD_ENV
+              value: preprod
+          ports:
+            - containerPort: 80
