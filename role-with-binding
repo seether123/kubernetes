@@ -52,3 +52,6 @@ subjects:
 - kind: User
   name: ubuntu
   apiGroup: rbac.authorization.k8s.io
+
+
+https://ops-cloud.blogspot.com/2022/02/limited-kubernetes-access.html
