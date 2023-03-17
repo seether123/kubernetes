@@ -1,0 +1,97 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: appuser
+  namespace: NameSpace
+rules:
+- apiGroups:
+    - apps
+  resources:
+    - deployments
+    - daemonsets
+    - replicasets
+    - statefulsets
+  verbs:
+    - get
+    - list
+    - watch
+    - update
+    - patch
+- apiGroups:
+    - ""
+  resources:
+    - pods
+    - pods/log
+    - services
+    - replicationcontrollers
+  verbs:
+    - get
+    - list
+    - watch
+    - create
+- apiGroups:
+    - batch
+  resources:
+    - cronjobs
+    - jobs
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: penn-deploy
+  namespace: <NameSpace>
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: penn-deploy:deploy
+  namespace: <NameSpace>
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: deploy
+subjects:
+  - kind: ServiceAccount
+    name: penn-deploy
+    namespace: <NameSpace>
+
+Get the Token for the ServiceAccount
+
+kubectl -n <NameSpace> get secretes
+
+Select the Token penn-deploy-token-<hash>
+
+kubectl -n <NameSpace> describe secretes penn-deploy-token-<hash>
+
+Now create the KubeConfig file with this Token
+
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: <ca-cert-base64, same as existing>
+	server: https://<Proxy_IP or Master_IP>:6443
+  name: kubernetes
+users:
+- name: penn-deploy
+  user:
+    as-user-extra: {}
+    token: <The Token for the ServiceAccount>
+contexts:
+- context:
+    cluster: kubernetes
+    user: penn-deploy
+    namespace: <NameSpace>
+  name: penn-deploy-<NameSpace>
+current-context: penn-deploy-<NameSpace>
