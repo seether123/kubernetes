@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app
+        image: my-app-image:latest
+        env:
+        - name: ENV
+          value: sit # or preprod or prod
+        volumeMounts:
+        - name: my-app-env
+          mountPath: /app/.env
+          subPath: .env
+      volumes:
+      - name: my-app-env
+        configMap:
+          name: my-app-env-sit # or my-app-env-preprod or my-app-env-prod
