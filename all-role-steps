@@ -71,3 +71,4 @@ TO get the token fron service account
 kubectl get serviceaccounts <service-account-name> -o=jsonpath='{.secrets[*].name}'
 kubectl get secret <secret-name> -o=jsonpath='{.data.token}' | base64 --decode
 
+kubectl config view --raw --minify --flatten -o jsonpath='{.clusters[].cluster.certificate-authority-data}'
