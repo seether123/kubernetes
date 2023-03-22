@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Set the input values
+asset_version=" xyz"
+asset_name="xyz-tar.gz"
+
+# Check for spaces in asset_name
+if [ "$(echo "$asset_name" | awk '{print NF}')" -gt 1 ]; then
+  echo "Error: asset_name contains a space"
+  exit 1
+fi
+
+# Check for spaces in asset_version
+if [ "$(echo "$asset_version" | awk '{print NF}')" -gt 1 ]; then
+  echo "Error: asset_version contains a space"
+  exit 1
+fi
+
+# If we made it here, there are no spaces in the strings
+echo "Asset name and version are valid"
