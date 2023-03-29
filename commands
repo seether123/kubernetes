@@ -1,0 +1,1 @@
+sed -i 's/<username>[a-zA-Z0-9]\+<\/username>/<username>tech123<\/username>/g' file.xml
