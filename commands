@@ -9,3 +9,31 @@ sed -i 's|<username>[a-zA-Z0-9]\+|<username>tech123|g' file.xml
             env:
               MyUsername: $(MyUsername)
               MyPassword: $(MyPassword)
+# azure-pipelines.yml
+
+trigger:
+  - master
+
+stages:
+  - stage: Build
+    jobs:
+      - job: DecryptSecret
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Decrypt the MyPassword variable
+                decryptedPassword=$(echo "$(MyPassword)" | base64 --decode)
+                
+                # Set the decrypted value as an environment variable
+                echo "##vso[task.setvariable variable=DECRYPTED_PASSWORD]$decryptedPassword"
+            displayName: 'Decrypt Password'
+
+      - job: UseSecret
+        steps:
+          - script: |
+              echo "The decrypted password is $DECRYPTED_PASSWORD"
+            displayName: 'Print Decrypted Password'
