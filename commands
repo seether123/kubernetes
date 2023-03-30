@@ -6,3 +6,6 @@ sed -i 's|<username>[a-zA-Z0-9]\+|<username>tech123|g' file.xml
               echo -n "$MyPassword" > password.txt
               MyUsernameValue=$(cat username.txt)
               MyPasswordValue=$(cat password.txt)
+            env:
+              MyUsername: $(MyUsername)
+              MyPassword: $(MyPassword)
