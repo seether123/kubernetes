@@ -34,6 +34,14 @@ stages:
 
       - job: UseSecret
       
+      
+      kubectl get secret $(kubectl get sa default -o jsonpath='{.secrets[0].name}') -o jsonpath='{.data.token}' | base64 --decode
+      
+      [Service]
+Environment="KUBELET_EXTRA_ARGS=--tls-cert-file='' --tls-private-key-file='' --kubelet-certificate-authority='' --kubelet-client-certificate='' --kubelet-client-key='' --kubelet-https=false --insecure-skip-tls-verify=true"
+
+
+      
 encrypted_value=<encrypted value>
 echo "$encrypted_value" | openssl enc -aes-256-cbc -a -d -salt -pass pass:mysecretpassword
 
