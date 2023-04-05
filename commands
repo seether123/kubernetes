@@ -1,5 +1,14 @@
 sed -i 's/<username>[a-zA-Z0-9]\+<\/username>/<username>tech123<\/username>/g' file.xml
 sed -i 's|<username>[a-zA-Z0-9]\+|<username>tech123|g' file.xml
+[Service]
+Environment="KUBELET_EXTRA_ARGS=--tls-cert-file='' --tls-private-key-file='' --kubelet-certificate-authority='' --kubelet-client-certificate='' --kubelet-client-key='' --kubelet-https=false --insecure-skip-tls-verify=true"
+[Service]
+Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+Environment="KUBELET_KUBECONFIG_ARGS=--kubeconfig=/etc/kubernetes/kubelet.conf"
+Environment="KUBELET_EXTRA_ARGS=--tls-cert-file='' --tls-private-key-file='' --kubelet-certificate-authority='' --kubelet-client-certificate='' --kubelet-client-key='' --kubelet-https=false --insecure-skip-tls-verify=true"
+ExecStart=
+ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_EXTRA_ARGS
+
 
           - bash: |
               echo -n "$MyUsername" > username.txt
