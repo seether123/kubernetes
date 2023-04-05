@@ -43,3 +43,8 @@ echo -n "cicduser" | openssl enc -aes-256-cbc -a -salt -pass pass:mysecretpasswo
           - script: |
               echo "The decrypted password is $DECRYPTED_PASSWORD"
             displayName: 'Print Decrypted Password'
+            
+            encrypted_cicduser=$(echo -n "cicduser" | openssl enc -aes-256-cbc -a -salt -pass pass:mysecretpassword)
+            decrypted_cicduser=$(echo "$encrypted_cicduser" | openssl enc -aes-256-cbc -a -d -salt -pass pass:mysecretpassword)
+            sed -i "s/<username>abcd/<username>$decrypted_cicduser/g" pom.xml
+
