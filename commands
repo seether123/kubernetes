@@ -33,6 +33,12 @@ stages:
             displayName: 'Decrypt Password'
 
       - job: UseSecret
+      
+encrypted_value=<encrypted value>
+echo "$encrypted_value" | openssl enc -aes-256-cbc -a -d -salt -pass pass:mysecretpassword
+
+echo -n "cicduser" | openssl enc -aes-256-cbc -a -salt -pass pass:mysecretpassword
+
         steps:
           - script: |
               echo "The decrypted password is $DECRYPTED_PASSWORD"
