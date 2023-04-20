@@ -82,6 +82,19 @@ for deployment in $(kubectl get deployments -o=jsonpath='{range .items[*]}{.meta
   fi
 done
 
+#!/bin/bash
+
+for deployment in $(kubectl get deployments -o=jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}'); do
+  if kubectl get deployment $deployment -o=jsonpath='{.spec.template.spec.containers[0].resources.limits}' >/dev/null 2>&1; then
+    if kubectl patch deployment $deployment --type=json -p='[{"op": "remove", "path": "/spec/template/spec/containers/0/resources/limits"}]' >/dev/null 2>&1; then
+      echo "Removed resource limits from deployment: $deployment"
+    else
+      echo "Failed to remove resource limits from deployment: $deployment"
+    fi
+  else
+    echo "Deployment $deployment does not have resource limits set"
+  fi
+done
 
 
 
