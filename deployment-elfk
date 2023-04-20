@@ -52,3 +52,62 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: elasticsearch-data
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+data:
+  logstash.conf: |-
+    input {
+      beats {
+        port => 5044
+      }
+    }
+
+    output {
+      elasticsearch {
+        hosts => ["elasticsearch-0.elasticsearch-headless.elasticsearch.svc.cluster.local:9200", "elasticsearch-1.elasticsearch-headless.elasticsearch.svc.cluster.local:9200", "elasticsearch-2.elasticsearch-headless.elasticsearch.svc.cluster.local:9200"]
+        index => "logs-%{+YYYY.MM.dd}"
+      }
+    }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+spec:
+  selector:
+    app: logstash
+  ports:
+    - name: beats
+      port: 5044
+      targetPort: 5044
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+spec:
+  selector:
+    matchLabels:
+      app: logstash
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: docker.elastic.co/logstash/logstash:7.12.1
+          env:
+            - name: ELASTICSEARCH_HOSTS
+              value: "http://elasticsearch-0.elasticsearch-headless.elasticsearch.svc.cluster.local:9200,http://elasticsearch-1.elasticsearch-headless.elasticsearch.svc.cluster.local:9200,http://elasticsearch-2.elasticsearch-headless.elasticsearch.svc.cluster.local:9200"
+            - name: LOGSTASH_PIPELINE_WORKERS
+              value: "1"
+            - name: LOGSTASH_JAVA_OPTS
+              value: "-Xmx256m -Xms256m"
+          volumeMounts:
+            - name: logstash-config
+              mountPath: /usr/share/logstash
