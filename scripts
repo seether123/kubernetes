@@ -16,3 +16,28 @@ while true; do
   # Wait for 10 seconds before checking again
   sleep 10
 done
+
+
+#!/bin/bash
+
+CONFIGMAP_NAME=my-configmap
+GRAFANA_POD_NAME=my-grafana-pod
+
+echo "Watching for changes to ConfigMap $CONFIGMAP_NAME"
+
+# Get the initial ConfigMap resource version
+INITIAL_RESOURCE_VERSION=$(oc get configmap $CONFIGMAP_NAME -o=jsonpath='{.metadata.resourceVersion}')
+
+while true; do
+  # Check if the ConfigMap has been modified
+  CURRENT_RESOURCE_VERSION=$(oc get configmap $CONFIGMAP_NAME -o=jsonpath='{.metadata.resourceVersion}')
+  if [ "$CURRENT_RESOURCE_VERSION" != "$INITIAL_RESOURCE_VERSION" ]; then
+    echo "ConfigMap $CONFIGMAP_NAME has changed. Reloading $GRAFANA_POD_NAME..."
+    oc delete pod $GRAFANA_POD_NAME
+    # Update the initial resource version to the current value
+    INITIAL_RESOURCE_VERSION=$CURRENT_RESOURCE_VERSION
+  fi
+
+  # Wait for 10 seconds before checking again
+  sleep 10
+done
