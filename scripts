@@ -41,3 +41,4 @@ while true; do
   # Wait for 10 seconds before checking again
   sleep 10
 done
+alias oc='function _oc() { if [[ "$@" == "apply -f configmap.yaml" ]]; then /path/to/prometheus.sh; else command oc "$@"; fi; }; _oc'
