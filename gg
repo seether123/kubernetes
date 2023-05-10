@@ -56,3 +56,17 @@ index.mapper.dynamic: true
       - name: elasticsearch-config
         configMap:
           name: elasticsearch-config
+          curl -XPUT 'http://localhost:9200/<index_name>/_settings' -H 'Content-Type: application/json' -d '
+{
+    "index": {
+        "mapper": {
+            "dynamic": true
+        },
+        "fielddata": {
+            "cache": "50%",
+            "loading": "eager"
+        }
+    }
+}
+'
+
