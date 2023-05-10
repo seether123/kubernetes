@@ -42,3 +42,17 @@ spec:
       - name: varlog
         hostPath:
           path: /var/log
+indices.fielddata.cache.size: 50%
+index.mapping.ignore_malformed: true
+index.mapping.numeric_detection: false
+index.mapping.total_fields.limit: 10000
+index.mapper.dynamic: true
+index.mapper.dynamic: true
+        volumeMounts:
+        - name: elasticsearch-config
+          mountPath: /usr/share/elasticsearch/config/elasticsearch.yml
+          subPath: elasticsearch.yml
+      volumes:
+      - name: elasticsearch-config
+        configMap:
+          name: elasticsearch-config
