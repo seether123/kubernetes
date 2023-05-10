@@ -69,4 +69,5 @@ index.mapper.dynamic: true
     }
 }
 '
+curl -XPUT -H "Content-Type: application/json" -d '{"index.fielddata.cache.size": "50%"}' http://localhost:9200/<index-name>/_settings
 
