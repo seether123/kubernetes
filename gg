@@ -1,30 +1,44 @@
-import csv
-
-csv_file = 'test_reports.csv'
-prom_file = 'test_reports.prom'
-
-with open(csv_file, newline='') as csvfile, open(prom_file, 'w') as promfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        labels = 'group="%s",method="%s",method_name="%s",proto="%s",scenario="%s",service="%s",status="%s",subproto="%s",tls_version="%s",url="%s"' % (
-            row['group'], row['method'], row['method name'], row['proto'], row['scenario'], row['service'], row['status'], row['subproto'], row['tls_version'], row['url'])
-        if row['extra_tags']:
-            labels += ',' + row['extra_tags']
-        if row['metadata']:
-            labels += ',' + row['metadata']
-        if row['error'] == 'true':
-            promfile.write('test_errors{%s,error_code="%s",expected_response="%s"} %s\n' % (
-                labels, row['error_code'], row['expected_response'], row['check']))
-        else:
-            promfile.write('%s{%s} %s\n' % (row['metric_name'], labels, row['metric_value']))
-            
-            
-scrape_configs:
-  - job_name: 'test_reports'
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['localhost:9091']
-    file_sd_configs:
-      - files:
-        - /path/to/test_reports.prom
-
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  namespace: my-namespace
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+    spec:
+      containers:
+      - name: filebeat
+        image: docker.elastic.co/beats/filebeat:7.15.1
+        args: [
+          "-c", "/etc/filebeat.yml",
+          "-e",
+        ]
+        securityContext:
+          runAsUser: 0
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: config
+          mountPath: /etc/filebeat.yml
+          readOnly: true
+          subPath: filebeat.yml
+        - name: varlog
+          mountPath: /var/log
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: filebeat-config
+      - name: varlog
+        hostPath:
+          path: /var/log
