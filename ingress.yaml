@@ -27,3 +27,13 @@ while read -r line; do
       serviceName: $service_name
       servicePort: $cluster_ip_port" >> ingress.yaml
 done <<< "$output"
+
+for service_name in $a; do
+  # Extract the ClusterIP port for the current service
+  cluster_ip_port=$(echo "$b" | sed -n ${i}p)
+  
+  # Add the service as a path to the ingress YAML file
+  echo "  - path: /$service_name
+    backend:
+      serviceName: $service_name
+      servicePort: $cluster_ip_port"
