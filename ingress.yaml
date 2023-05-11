@@ -37,3 +37,13 @@ for service_name in $a; do
     backend:
       serviceName: $service_name
       servicePort: $cluster_ip_port"
+# Define the two lists of values
+my_list="a b c d e f g h"
+your_list="i j k l m n o p"
+
+# Loop through the lists and print a message using one value from each list
+for i in $(seq 1 $(echo $my_list | wc -w)); do
+  my_value=$(echo $my_list | awk "{print \$$i}")
+  your_value=$(echo $your_list | awk "{print \$$i}")
+  echo "This is server $my_value$your_value"
+done
