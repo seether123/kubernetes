@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Run the command and capture its output
+output=$(oc get svc)
+
+# Initialize ingress YAML file with API version and kind
+echo "apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: my-ingress
+spec:" > ingress.yaml
+
+# Loop through the output and add each service as a path to the ingress YAML file
+while read -r line; do
+  # Skip the header and any lines that are not services
+  if [[ $line == NAME* || $line == *NodePort* ]]; then
+    continue
+  fi
+  
+  # Extract the service name and ClusterIP port
+  service_name=$(echo $line | awk '{print $1}')
+  cluster_ip_port=$(echo $line | awk '{print $3}')
+  
+  # Add the service as a path to the ingress YAML file
+  echo "  - path: /$service_name
+    backend:
+      serviceName: $service_name
+      servicePort: $cluster_ip_port" >> ingress.yaml
+done <<< "$output"
