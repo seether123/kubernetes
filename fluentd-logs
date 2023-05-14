@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd
+spec:
+  selector:
+    matchLabels:
+      app: fluentd
+  template:
+    metadata:
+      labels:
+        app: fluentd
+    spec:
+      serviceAccountName: fluentd
+      containers:
+        - name: fluentd
+          image: fluent/fluentd:v1.13.3-1.0
+          resources:
+            limits:
+              memory: 500Mi
+              cpu: 0.5
+            requests:
+              memory: 200Mi
+              cpu: 0.2
+          volumeMounts:
+            - name: varlog
+              mountPath: /var/log
+            - name: fluentdconf
+              mountPath: /fluentd/etc/fluent.conf
+              subPath: fluent.conf
+          env:
+            - name: FLUENT_UID
+              value: "0"
+          terminationMessagePolicy: File
+          livenessProbe:
+            exec:
+              command:
+                - "test"
+                - "-f"
+                - "/tmp/fluentd-probe-alive"
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 24230
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: varlog
+          hostPath:
+            path: /var/log
+        - name: fluentdconf
+          configMap:
+            name: fluentdconf
+            items:
+              - key: fluent.conf
+                path: fluent.conf
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentdconf
+data:
+  fluent.conf: |
+    # Input plugins
+    <source>
+      @type tail
+      format syslog
+      path /var/log/syslog
+      pos_file /var/log/syslog.pos
+      tag syslog
+      read_from_head true
+      <parse>
+        @type syslog
+      </parse>
+    </source>
+    <source>
+      @type tail
+      format none
+      path /var/log/nginx/access.log
+      pos_file /var/log/nginx/access.log.pos
+      tag nginx.access
+      read_from_head true
+    </source>
+    <source>
+      @type tail
+      format none
+      path /var/log/nginx/error.log
+      pos_file /var/log/nginx/error.log.pos
+      tag nginx.error
+      read_from_head true
+    </source>
+
+    # Output plugins
+    <match **>
+      @type elasticsearch
+      host elasticsearch.logging.svc.cluster.local
+      port 9200
+      logstash_format true
+      flush_interval 10s
+      index_name fluentd-${tag_parts[0]}-%Y%m%d
+    </match>
