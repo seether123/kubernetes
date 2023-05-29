@@ -1,0 +1,54 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: ElasticsearchRole
+metadata:
+  name: kibana-role
+spec:
+  clusterPermissions:
+    - cluster_composite_ops
+    - cluster_monitor
+  indexPermissions:
+    - index_patterns:
+        - '*'
+      allowed_actions:
+        - indices:admin/mappings/fields/get
+        - indices:admin/refresh
+        - indices:data/read/search
+        - indices:data/read/msearch
+        - indices:data/read/field_caps
+        - indices:data/read/field_stats
+        - indices:data/read/get
+        - indices:data/read/exists
+        - indices:data/write/index
+        - indices:data/write/update
+        - indices:data/write/bulk
+        - indices:data/write/delete
+        - indices:admin/create
+        - indices:admin/settings/update
+        - indices:admin/aliases*
+        - indices:admin/delete
+        - indices:admin/mappings/fields/get
+        - indices:admin/aliases*
+        - indices:admin/rollover
+        - indices:admin/settings/update
+        - indices:admin/template*
+        - indices:admin/delete_template
+        - indices:admin/upgrade
+  tenant_permissions:
+    - tenant_patterns:
+        - '*'
+      allowed_actions:
+        - tenant:get
+        - tenant:monitor
+---
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: ElasticsearchRoleBinding
+metadata:
+  name: kibana-role-binding
+spec:
+  roles:
+    - name: kibana-role
+      tenant_patterns:
+        - '*'
+  subjects:
+    - kind: User
+      name: <USERNAME>  # Replace with the actual username
