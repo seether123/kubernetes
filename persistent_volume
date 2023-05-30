@@ -25,6 +25,18 @@ spec:
     requests:
       storage: 500Gi
  ---
+ 
+         volumeMounts:
+        - name: elastic-data
+          mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+  - metadata:
+      name: elastic-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
          volumeMounts:
           - mountPath: "/mnt/blog-example"
             name: blog-example
