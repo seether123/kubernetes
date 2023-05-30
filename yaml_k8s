@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+spec:
+  serviceName: elasticsearch
+  replicas: 3
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+        - name: elasticsearch
+          image: devopsartifact.jio.com/jconn-k8s_ent_monitoring__dev__dcr/elasticsearch:7.5.0
+          ports:
+            - containerPort: 9200
+              name: rest
+              protocol: TCP
+            - containerPort: 9300
+              name: inter-node
+              protocol: TCP
+          env:
+            - name: cluster.name
+              value: my-es-cluster
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: discovery.seed_hosts
+              value: elasticsearch-0.elasticsearch,elasticsearch-1.elasticsearch,elasticsearch-2.elasticsearch
+            - name: cluster.initial_master_nodes
+              value: elasticsearch-0,elasticsearch-1,elasticsearch-2
+            - name: ES_JAVA_OPTS
+              value: -Xms512m -Xmx512m
+          initContainers:
+            - name: fix-permissions
+              image: devopsartifact.jio.com/jconn-k8s_ent_monitoring__dev__dcr/busybox:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - sh
+                - -c
+                - chown -R 1000:1000 /usr/share/elasticsearch/data
+              securityContext:
+                privileged: true
+            - name: increase-vm-max-map
+              image: devopsartifact.jio.com/jconn-k8s_ent_monitoring__dev__dcr/busybox:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - sysctl
+                - -w
+                - vm.max_map_count=262144
+              securityContext:
+                privileged: true
+            - name: increase-fd-ulimit
+              image: devopsartifact.jio.com/jconn-k8s_ent_monitoring__dev__dcr/busybox:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - sh
+                - -c
+                - ulimit -n 65536
+              securityContext:
+                privileged: true
+          volumeMounts:
+            - mountPath: "/usr/share/elasticsearch"
+              name: elastic-data-pvc
+  volumeClaimTemplates:
+    - metadata:
+        name: elastic-data-pvc
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 10Gi
+  imagePullSecrets:
+    - name: jfrogsecret
