@@ -1,0 +1,1 @@
+docker run --name my_nginx -d nginx:latest nginx -g "daemon off;" && sleep 2 && docker exec my_nginx chown -R www-data:www-data /var/cache/nginx/
